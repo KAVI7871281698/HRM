@@ -37,7 +37,11 @@ class _DashboardState extends State<Dashboard> {
           "Welcome Harish",
           style: GoogleFonts.poppins(
             color: Colors.white,
-            fontSize: isTablet ? 26 : isDesktop ? 28 : 20,
+            fontSize: isTablet
+                ? 26
+                : isDesktop
+                ? 28
+                : 20,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -45,19 +49,20 @@ class _DashboardState extends State<Dashboard> {
           builder: (context) => IconButton(
             icon: Icon(Icons.menu, size: w * 0.07, color: Colors.white),
             onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => SettingsScreen(),
-                  ),
-                );
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SettingsScreen()),
+              );
             },
           ),
         ),
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationApp()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NotificationApp()),
+              );
             },
             icon: Icon(
               Icons.notifications_none,
@@ -75,7 +80,7 @@ class _DashboardState extends State<Dashboard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Your Customer Management Hub",
+              "Your HR Management Hub",
               style: GoogleFonts.poppins(
                 fontSize: isTablet ? 22 : 16,
                 fontWeight: FontWeight.w600,
@@ -129,7 +134,7 @@ class _DashboardState extends State<Dashboard> {
                           const LinearGradient(
                             colors: [
                               Colors.white,
-                              Color.fromRGBO(255, 202, 141, 0.75)
+                              Color.fromRGBO(255, 202, 141, 0.75),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -144,7 +149,7 @@ class _DashboardState extends State<Dashboard> {
                           const LinearGradient(
                             colors: [
                               Colors.white,
-                              Color.fromRGBO(255, 152, 154, 0.53)
+                              Color.fromRGBO(255, 152, 154, 0.53),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -176,12 +181,16 @@ class _DashboardState extends State<Dashboard> {
             Container(
               padding: EdgeInsets.all(w * 0.03),
               decoration: BoxDecoration(
-                color: const Color(0xFF26A69A),
+                color: const Color(0xFF1B2C61),
                 borderRadius: BorderRadius.circular(boxRadius),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.campaign, color: Colors.white, size: isTablet ? 36 : 30),
+                  Icon(
+                    Icons.campaign,
+                    color: Colors.white,
+                    size: isTablet ? 36 : 30,
+                  ),
                   SizedBox(width: w * 0.03),
                   Expanded(
                     child: Text(
@@ -196,8 +205,10 @@ class _DashboardState extends State<Dashboard> {
                   TextButton(
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFF26A69A),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      foregroundColor: const Color(0xFF1B2C61),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     onPressed: () {},
                     child: Text(
@@ -213,16 +224,24 @@ class _DashboardState extends State<Dashboard> {
             ),
 
             SizedBox(height: h * 0.02),
-            Text("Your Task",
-                style: GoogleFonts.poppins(
-                    fontSize: isTablet ? 20 : 14, fontWeight: FontWeight.w700)),
+            Text(
+              "Your Task",
+              style: GoogleFonts.poppins(
+                fontSize: isTablet ? 20 : 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             SizedBox(height: h * 0.01),
             taskCard(),
 
             SizedBox(height: h * 0.02),
-            Text("Your Target",
-                style: GoogleFonts.poppins(
-                    fontSize: isTablet ? 20 : 14, fontWeight: FontWeight.w700)),
+            Text(
+              "Your Target",
+              style: GoogleFonts.poppins(
+                fontSize: isTablet ? 20 : 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             SizedBox(height: h * 0.01),
             targetBox(),
 
@@ -231,18 +250,26 @@ class _DashboardState extends State<Dashboard> {
               padding: EdgeInsets.all(w * 0.04),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                    colors: [Colors.white, Color(0xFF24D7B3)],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight),
+                  colors: [Colors.white, Color(0xFF24D7B3)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
                 borderRadius: BorderRadius.circular(boxRadius),
                 boxShadow: const [
-                  BoxShadow(offset: Offset(0, 10), blurRadius: 5, color: Colors.black12)
+                  BoxShadow(
+                    offset: Offset(0, 10),
+                    blurRadius: 5,
+                    color: Colors.black12,
+                  ),
                 ],
               ),
               child: Row(
                 children: [
-                  Image.asset("assets/frame.png",
-                      height: isTablet ? 90 : 60, width: isTablet ? 50 : 30),
+                  Image.asset(
+                    "assets/frame.png",
+                    height: isTablet ? 90 : 70,
+                    width: isTablet ? 50 : 35,
+                  ),
                   SizedBox(width: w * 0.04),
                   Expanded(
                     child: Text(
@@ -258,9 +285,13 @@ class _DashboardState extends State<Dashboard> {
               ),
             ),
             SizedBox(height: h * 0.02),
-            Text("Leave Reports",
-                style: GoogleFonts.poppins(
-                    fontSize: isTablet ? 20 : 14, fontWeight: FontWeight.w700)),
+            Text(
+              "Leave Reports",
+              style: GoogleFonts.poppins(
+                fontSize: isTablet ? 20 : 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             SizedBox(height: h * 0.01),
             leaveReport(),
             SizedBox(height: h * 0.03),
@@ -270,27 +301,45 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget menuBox(BuildContext context, double width, String title, String asset,
-      Gradient gradient, {bool isFullWidth = false}) {
+  Widget menuBox(
+    BuildContext context,
+    double width,
+    String title,
+    String asset,
+    Gradient gradient, {
+    bool isFullWidth = false,
+  }) {
     double w = MediaQuery.of(context).size.width;
 
     return GestureDetector(
       onTap: () {
         if (title == "Employee") {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const EmployeeDetailsScreen()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const EmployeeDetailsScreen(),
+            ),
+          );
         } else if (title == "Marketing") {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => MarketingScreen()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MarketingScreen()),
+          );
         } else if (title == "Performance") {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => PerformanceScreen()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => PerformanceScreen()),
+          );
         } else if (title == "Reports") {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => ReportsScreen()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ReportsScreen()),
+          );
         } else if (title == "Leave") {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => LeaveManagementScreen()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LeaveManagementScreen()),
+          );
         }
       },
       child: Container(
@@ -304,56 +353,60 @@ class _DashboardState extends State<Dashboard> {
               color: Colors.black12,
               blurRadius: 10,
               offset: const Offset(0, 10),
-            )
+            ),
           ],
         ),
         child: isFullWidth
             ? Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(asset, height: w * 0.15),
-            SizedBox(width: w * 0.04),
-            Text(
-              title,
-              style: GoogleFonts.poppins(
-                  fontSize: w * 0.06, fontWeight: FontWeight.w600),
-            ),
-          ],
-        )
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(asset, height: w * 0.15),
+                  SizedBox(width: w * 0.04),
+                  Text(
+                    title,
+                    style: GoogleFonts.poppins(
+                      fontSize: w * 0.06,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              )
             : Column(
-          children: [
-            Image.asset(asset, height: w * 0.12),
-            SizedBox(height: w * 0.02),
-            Text(
-              title,
-              style: GoogleFonts.poppins(
-                  fontSize: w * 0.035, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
+                children: [
+                  Image.asset(asset, height: w * 0.12),
+                  SizedBox(height: w * 0.02),
+                  Text(
+                    title,
+                    style: GoogleFonts.poppins(
+                      fontSize: w * 0.035,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }
 
   Widget taskCard() {
-    return Stack(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.transparent),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: const [
-              BoxShadow(
-                offset: Offset(0, 10),
-                blurRadius: 6,
-                color: Colors.black12,
-              )
-            ],
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            offset: Offset(0, 10),
+            blurRadius: 6,
+            color: Colors.black12,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 "Task Completion Rate",
@@ -362,42 +415,40 @@ class _DashboardState extends State<Dashboard> {
                   fontSize: 15,
                 ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                "92%",
-                style: GoogleFonts.poppins(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const LinearProgressIndicator(
-                value: 0.92,
-                minHeight: 8,
-                backgroundColor: Colors.grey,
-                valueColor: AlwaysStoppedAnimation(Color(0xFF26A69A)),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Almost all assigned tasks completed on time",
-                style: GoogleFonts.poppins(fontSize: 12,color: Colors.black,fontWeight: FontWeight.w500),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Color(0xFF1B2C61),
               ),
             ],
           ),
-        ),
-        Positioned(
-          top: 5,
-          right: 17,
-          child: Icon(
-            Icons.arrow_forward_ios,
-            size: 20,
-            color: Colors.black,
+          const SizedBox(height: 12),
+          Text(
+            "92%",
+            style: GoogleFonts.poppins(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 12),
+          Image.asset(
+            "assets/progress_bar.png",
+            width: double.infinity,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "Allmost all assigned tasks completed on time",
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: Colors.black,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
-
 
   Widget targetBox() {
     return Container(
@@ -406,25 +457,46 @@ class _DashboardState extends State<Dashboard> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
-          BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.black12)
+          BoxShadow(
+            offset: Offset(0, 10),
+            blurRadius: 10,
+            color: Colors.black12,
+          ),
         ],
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Image.asset("assets/target.png", height: 25, width: 25),
-          const SizedBox(width: 8),
-          Text("Your Target Completion",
-              style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600)),
-        ]),
-        const SizedBox(height: 12),
-        const LinearProgressIndicator(
-            value: 0.90,
-            minHeight: 8,
-            backgroundColor: Colors.grey,
-            valueColor: AlwaysStoppedAnimation(Colors.red)),
-        const SizedBox(height: 8),
-        Text("90% Completed", style: GoogleFonts.poppins(fontSize: 14,fontWeight: FontWeight.w500,color: Color(0xffEC6E2D))),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Image.asset("assets/target.png", height: 25, width: 25),
+              const SizedBox(width: 8),
+              Text(
+                "Your Target Completion",
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Image.asset(
+            "assets/progress_bar.png",
+            width: double.infinity,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "90% Completed",
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xffEC6E2D),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -435,24 +507,38 @@ class _DashboardState extends State<Dashboard> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
-          BoxShadow(offset: Offset(0, 10), blurRadius: 10, color: Colors.black12)
+          BoxShadow(
+            offset: Offset(0, 10),
+            blurRadius: 10,
+            color: Colors.black12,
+          ),
         ],
       ),
-      child: Column(children: [
-        Row(children: [
-          Image.asset("assets/casual_leave.png", height: 60, width: 60),
-          const SizedBox(width: 12),
-          Text("Casual Leave:\nTaken: 0 Day\nBalance: 12 Days",
-              style: GoogleFonts.poppins(fontSize: 13)),
-        ]),
-        const SizedBox(height: 20),
-        Row(children: [
-          Image.asset("assets/casual_leave.png", height: 60, width: 60),
-          const SizedBox(width: 12),
-          Text("Medical Leave:\nTaken: 0 Day\nBalance: 12 Days",
-              style: GoogleFonts.poppins(fontSize: 13)),
-        ]),
-      ]),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Image.asset("assets/casual_leave.png", height: 60, width: 60),
+              const SizedBox(width: 12),
+              Text(
+                "Casual Leave:\nTaken: 0 Day\nBalance: 12 Days",
+                style: GoogleFonts.poppins(fontSize: 13),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Image.asset("assets/casual_leave.png", height: 60, width: 60),
+              const SizedBox(width: 12),
+              Text(
+                "Medical Leave:\nTaken: 0 Day\nBalance: 12 Days",
+                style: GoogleFonts.poppins(fontSize: 13),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

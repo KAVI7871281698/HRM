@@ -1,8 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hrm/views/main_root.dart';
-import '../login_section/login_screen.dart';
+
+import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -13,61 +14,40 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   bool _isAgreed = false;
+  bool isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _saveLocation();
-  }
+  /// Controllers
+  final TextEditingController nameCtrl = TextEditingController();
+  final TextEditingController emailCtrl = TextEditingController();
+  final TextEditingController mobileCtrl = TextEditingController();
+  final TextEditingController whatsappCtrl = TextEditingController();
 
-  /// SAVE LATITUDE & LONGITUDE 
-  Future<void> _saveLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-
-    if (permission == LocationPermission.deniedForever) return;
-
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('lat', position.latitude);
-    await prefs.setDouble('lng', position.longitude);
-  }
+  /// API URL
+  final String apiUrl = "https://erpsmart.in/total/api/m_api/";
 
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    final double width = size.width;
-    final double height = size.height;
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: width * 0.08),
+            padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: height * 0.05),
+                SizedBox(height: size.height * 0.05),
 
                 /// LOGO
-                Center(
-                  child: Image.asset(
-                    'assets/logo.png',
-                    width: width * 0.55,
-                    fit: BoxFit.contain,
-                  ),
+                Image.asset(
+                  'assets/logo.png',
+                  width: size.width * 0.55,
+                  fit: BoxFit.contain,
                 ),
 
-                SizedBox(height: height * 0.04),
+                SizedBox(height: size.height * 0.04),
 
                 /// TITLE
                 const Align(
@@ -82,172 +62,100 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
 
-                SizedBox(height: height * 0.005),
+                const SizedBox(height: 5),
 
-                const Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    "Create your account",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                const Text(
+                  "Create your account",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
 
-                SizedBox(height: height * 0.03),
+                const SizedBox(height: 25),
 
                 /// NAME
-                _inputField("Enter Your Name"),
-
-                SizedBox(height: height * 0.02),
+                _inputField("Enter Your Name", nameCtrl),
+                const SizedBox(height: 16),
 
                 /// EMAIL
-                _inputField("Enter Business Email"),
-
-                SizedBox(height: height * 0.02),
+                _inputField("Enter Business Email", emailCtrl),
+                const SizedBox(height: 16),
 
                 /// MOBILE
                 _inputField(
                   "Enter Mobile Number",
-                  keyboardType: TextInputType.phone,
+                  mobileCtrl,
+                  type: TextInputType.phone,
                 ),
-
-                SizedBox(height: height * 0.02),
+                const SizedBox(height: 16),
 
                 /// WHATSAPP
                 _inputField(
                   "Enter WhatsApp Number",
-                  keyboardType: TextInputType.phone,
+                  whatsappCtrl,
+                  type: TextInputType.phone,
                 ),
+                const SizedBox(height: 16),
 
-                SizedBox(height: height * 0.02),
-
-                /// TERMS CHECKBOX
+                /// TERMS
                 Row(
                   children: [
                     Checkbox(
                       value: _isAgreed,
                       activeColor: const Color(0xFF2BAE9E),
                       onChanged: (value) {
-                        setState(() {
-                          _isAgreed = value!;
-                        });
+                        setState(() => _isAgreed = value!);
                       },
                     ),
-                    Expanded(
-                      child: RichText(
-                        text: const TextSpan(
-                          text: "I agree to the ",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.black54,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: "Terms of Service ",
-                              style: TextStyle(
-                                color: Color(0xFF2BAE9E),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            TextSpan(text: "and "),
-                            TextSpan(
-                              text: "Privacy Policy",
-                              style: TextStyle(
-                                color: Color(0xFF2BAE9E),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+                    const Expanded(
+                      child: Text(
+                        "I agree to the Terms of Service and Privacy Policy",
+                        style: TextStyle(fontSize: 12),
                       ),
                     ),
                   ],
                 ),
 
-                SizedBox(height: height * 0.02),
+                const SizedBox(height: 16),
 
-                /// GET STARTED BUTTON
+                /// BUTTON
                 SizedBox(
                   width: double.infinity,
                   height: 44,
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (!_isAgreed) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content:
-                                Text("Please accept terms & conditions"),
-                          ),
-                        );
-                        return;
-                      }
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MainRoot(),
-                        ),
-                      );
-                    },
+                    onPressed: isLoading ? null : _signupApiCall,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2BAE9E),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
-                      "GET STARTED",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    child: isLoading
+                        ? const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          )
+                        : const Text(
+                            "GET STARTED",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                 ),
 
-                SizedBox(height: height * 0.03),
+                const SizedBox(height: 30),
 
-                /// SOCIAL LOGIN
-                const Text(
-                  "or Signup with",
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
-                ),
-
-                SizedBox(height: height * 0.02),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/google.png',
-                      width: 36,
-                      height: 36,
-                    ),
-                    const SizedBox(width: 20),
-                    Image.asset(
-                      'assets/apple.png',
-                      width: 48,
-                      height: 48,
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: height * 0.03),
-
-                /// ALREADY HAVE ACCOUNT
+                /// LOGIN REDIRECT
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
                       "Already have an account? ",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black54,
-                      ),
+                      style: TextStyle(fontSize: 12),
                     ),
                     GestureDetector(
                       onTap: () {
@@ -270,7 +178,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ],
                 ),
 
-                SizedBox(height: height * 0.03),
+                const SizedBox(height: 30),
               ],
             ),
           ),
@@ -279,25 +187,85 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  /// INPUT FIELD (UNCHANGED UI)
+  /// INPUT FIELD (UI UNCHANGED)
   Widget _inputField(
-    String hint, {
-    TextInputType keyboardType = TextInputType.text,
+    String hint,
+    TextEditingController controller, {
+    TextInputType type = TextInputType.text,
   }) {
     return TextField(
-      keyboardType: keyboardType,
+      controller: controller,
+      keyboardType: type,
       decoration: InputDecoration(
         hintText: hint,
-        enabledBorder: OutlineInputBorder(
+        border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(color: Colors.black26),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(color: Color(0xFF2BAE9E)),
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      ),
+    );
+  }
+
+  /// ✅ SIGNUP API CALL (FINAL FIX)
+  Future<void> _signupApiCall() async {
+    if (!_isAgreed) {
+      _showSnack("Please accept terms", false);
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lat = prefs.getDouble('lat')?.toString() ?? "0";
+      final lng = prefs.getDouble('lng')?.toString() ?? "0";
+
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        body: {
+          "name": nameCtrl.text.trim(),
+          "mobile": mobileCtrl.text.trim(),
+          "w_number": whatsappCtrl.text.trim(),
+          "email": emailCtrl.text.trim(),
+          "cid": "21472147",
+          "type": "2045",
+          "device_id": "123456",
+          "ln": lng,
+          "lt": lat,
+        },
+      );
+
+      debugPrint("API RESPONSE => ${response.body}");
+
+      final data = jsonDecode(response.body);
+
+      /// ✅ CORRECT CONDITION FOR YOUR API
+      if (data["error"] == false) {
+        _showSnack(data["error_msg"] ?? "Signup successful", true);
+
+        Future.delayed(const Duration(milliseconds: 800), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+          );
+        });
+      } else {
+        _showSnack(data["error_msg"] ?? "Signup failed", false);
+      }
+    } catch (e) {
+      debugPrint("SIGNUP ERROR => $e");
+      _showSnack("Server error", false);
+    }
+
+    setState(() => isLoading = false);
+  }
+
+  /// SNACKBAR
+  void _showSnack(String message, bool success) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: success ? Colors.green : Colors.red,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }

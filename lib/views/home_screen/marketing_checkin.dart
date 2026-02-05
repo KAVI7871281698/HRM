@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hrm/views/widgets/profile_card.dart';
+import '/views/widgets/profile_card.dart';
 
 import 'marketing_checkout.dart';
 

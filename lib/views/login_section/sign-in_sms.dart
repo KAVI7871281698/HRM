@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:hrm/views/login_section/login_screen.dart';
 import 'package:hrm/views/login_section/sign-in_whatsapp.dart';
 import 'package:hrm/views/login_section/sign-up.dart';
-import 'package:hrm/views/login_section/otp_popup.dart';
-import '../../services/auth_api.dart';
+import 'otp_popup.dart';
+
+import '../../services/login_api.dart';
 
 class SmsLogin extends StatefulWidget {
   const SmsLogin({super.key});
@@ -14,11 +17,10 @@ class SmsLogin extends StatefulWidget {
 
 class _SmsLoginState extends State<SmsLogin> {
   final TextEditingController _emailController = TextEditingController();
-  bool _loading = false;
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
-    // MediaQuery
     final Size size = MediaQuery.of(context).size;
     final double height = size.height;
     final double width = size.width;
@@ -45,7 +47,6 @@ class _SmsLoginState extends State<SmsLogin> {
 
                 SizedBox(height: height * 0.05),
 
-                /// Sign in title
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -60,7 +61,6 @@ class _SmsLoginState extends State<SmsLogin> {
 
                 SizedBox(height: height * 0.01),
 
-                /// Subtitle
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -74,7 +74,7 @@ class _SmsLoginState extends State<SmsLogin> {
 
                 SizedBox(height: height * 0.05),
 
-                /// Mobile Field (UI SAME)
+                /// Mobile Field
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.phone,
@@ -97,57 +97,17 @@ class _SmsLoginState extends State<SmsLogin> {
                   width: 280,
                   height: height * 0.06,
                   child: ElevatedButton(
-                    onPressed: _loading ? null : () async {
-                      final mobile = _emailController.text.trim();
-
-                      if (mobile.length != 10) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Enter valid 10-digit mobile number"),
-                          ),
-                        );
-                        return;
-                      }
-
-                      setState(() => _loading = true);
-
-                      bool sent = await AuthApi.sendOtp(mobile);
-
-                      setState(() => _loading = false);
-
-                      if (sent) {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (_) {
-                            return OtpBottomSheet(
-                              phoneNumber: mobile,
-                            );
-                          },
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Send OTP failed"),
-                          ),
-                        );
-                      }
-                    },
+                    onPressed: isLoading ? null : _sendOtpApi,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xff26A69A),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: _loading
-                        ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
+                    child: isLoading
+                        ? const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
                           )
                         : const Text(
                             "Next",
@@ -182,7 +142,7 @@ class _SmsLoginState extends State<SmsLogin> {
 
                 SizedBox(height: height * 0.03),
 
-                /// WhatsApp & Mail Buttons
+                /// WhatsApp & Mail
                 Row(
                   children: [
                     Expanded(
@@ -191,21 +151,13 @@ class _SmsLoginState extends State<SmsLogin> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const WhatsappLogin(),
-                            ),
+                                builder: (_) => WhatsappLogin()),
                           );
                         },
                         icon: const Icon(Icons.message, color: Colors.green),
                         label: const Text(
                           "WhatsApp",
                           style: TextStyle(color: Colors.black),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xff26A69A)),
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
                         ),
                       ),
                     ),
@@ -216,8 +168,7 @@ class _SmsLoginState extends State<SmsLogin> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const LoginScreen(),
-                            ),
+                                builder: (_) => LoginScreen()),
                           );
                         },
                         icon: const Icon(
@@ -228,13 +179,6 @@ class _SmsLoginState extends State<SmsLogin> {
                         label: const Text(
                           "Via Mail",
                           style: TextStyle(color: Colors.black),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xff26A69A)),
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
                         ),
                       ),
                     ),
@@ -252,7 +196,6 @@ class _SmsLoginState extends State<SmsLogin> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
                       ),
                     ),
                     GestureDetector(
@@ -260,8 +203,7 @@ class _SmsLoginState extends State<SmsLogin> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const SignupScreen(),
-                          ),
+                              builder: (_) => SignupScreen()),
                         );
                       },
                       child: const Text(
@@ -279,30 +221,89 @@ class _SmsLoginState extends State<SmsLogin> {
                 SizedBox(height: height * 0.06),
 
                 /// Terms
-                RichText(
+                const Text(
+                  "By Continuing you agree to our\nTerms and Conditions",
                   textAlign: TextAlign.center,
-                  text: const TextSpan(
-                    text: "By Continuing you agree to our\n",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: "Terms and Conditions",
-                        style: TextStyle(
-                          color: Color(0xFF2BAE9E),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// ✅ SEND OTP API
+  Future<void> _sendOtpApi() async {
+    if (_emailController.text.isEmpty) {
+      _snack("Please enter mobile number", false);
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lat = prefs.getDouble('lat')?.toString() ?? "145";
+      final lng = prefs.getDouble('lng')?.toString() ?? "145";
+
+      final response = await LoginApi.sendOtp(
+        mobile: _emailController.text.trim(),
+        cid: "21472147",
+        type: "2000",
+        deviceId: "12345",
+        lat: lat,
+        lng: lng,
+      );
+
+      debugPrint("OTP API RESPONSE => $response");
+
+      final bool isSuccess =
+          response["error"] == false ||
+          response["error"] == "false" ||
+          response["status"] == true ||
+          response["status"] == 1;
+
+      if (isSuccess) {
+        _snack(
+          response["error_msg"] ??
+              response["message"] ??
+              "OTP sent successfully",
+          true,
+        );
+
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) {
+            return OtpBottomSheet(
+              phoneNumber: _emailController.text.trim(),
+            );
+          },
+        );
+      } else {
+        _snack(
+          response["error_msg"] ??
+              response["message"] ??
+              "OTP failed",
+          false,
+        );
+      }
+    } catch (e) {
+      debugPrint("OTP ERROR => $e");
+      _snack("Server error", false);
+    }
+
+    setState(() => isLoading = false);
+  }
+
+  void _snack(String msg, bool success) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: success ? Colors.green : Colors.red,
       ),
     );
   }

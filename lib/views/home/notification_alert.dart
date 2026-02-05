@@ -7,10 +7,12 @@ class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
 
   @override
-  State<NotificationSettingsScreen> createState() => _NotificationSettingsScreenState();
+  State<NotificationSettingsScreen> createState() =>
+      _NotificationSettingsScreenState();
 }
 
-class _NotificationSettingsScreenState extends State<NotificationSettingsScreen> {
+class _NotificationSettingsScreenState
+    extends State<NotificationSettingsScreen> {
   // Toggle states
   bool _reportsAlert = true;
   bool _systemUpdates = false;
@@ -84,6 +86,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               title: "Reports Alerts",
               value: _reportsAlert,
               isTablet: isTablet,
+              itemTitleFontSize: itemTitleFontSize,
+              showThumbIcons: true,
               onChanged: (val) => setState(() => _reportsAlert = val),
             ),
 
@@ -93,6 +97,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               title: "System Updates",
               value: _systemUpdates,
               isTablet: isTablet,
+              itemTitleFontSize: itemTitleFontSize,
               onChanged: (val) => setState(() => _systemUpdates = val),
             ),
 
@@ -102,6 +107,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               title: "Account & Security Alerts",
               value: _accountSecurity,
               isTablet: isTablet,
+              itemTitleFontSize: itemTitleFontSize,
               onChanged: (val) => setState(() => _accountSecurity = val),
             ),
 
@@ -117,7 +123,9 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     required String title,
     required bool value,
     required bool isTablet,
+    required double itemTitleFontSize,
     required Function(bool) onChanged,
+    bool showThumbIcons = false,
   }) {
     return Container(
       padding: EdgeInsets.symmetric(
@@ -141,7 +149,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           Text(
             title,
             style: GoogleFonts.poppins(
-              fontSize: isTablet ? 18 : 16,
+              fontSize: itemTitleFontSize,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
@@ -153,9 +161,34 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               onChanged: onChanged,
               activeColor: Colors.white,
               activeTrackColor: const Color(0xff6750A4),
-              inactiveThumbColor: Colors.grey,
-              inactiveTrackColor: Colors.grey.shade300,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              inactiveThumbColor: const Color(0xFF79747E),
+              inactiveTrackColor: const Color(0xFFE1DDF1),
+              trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((
+                Set<WidgetState> states,
+              ) {
+                if (states.contains(WidgetState.selected)) {
+                  return Colors.transparent;
+                }
+                return const Color(0xFF79747E);
+              }),
+              thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+                Set<WidgetState> states,
+              ) {
+                if (states.contains(WidgetState.selected)) {
+                  if (showThumbIcons) {
+                    return const Icon(
+                      Icons.check,
+                      color: Color(0xff6750A4),
+                      size: 20,
+                    );
+                  }
+                  return const Icon(null);
+                }
+                if (showThumbIcons) {
+                  return const Icon(Icons.close, color: Colors.white, size: 20);
+                }
+                return const Icon(null);
+              }),
             ),
           ),
         ],

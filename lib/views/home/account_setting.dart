@@ -145,10 +145,10 @@ class AccountSettingsScreen extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     // Detail Rows
-                    _buildDetailRow("Name", "Harish"),
-                    _buildDetailRow("Mail Id", "hariharanss@app.in"),
-                    _buildDetailRow("Mobile Number", "+91 98765 43210"),
-                    _buildDetailRow("Address", "Coimbatore"),
+                    _buildDetailRow("Name", "      Harish"),
+                    _buildDetailRow("Mail Id", "      hariharanss@app.in"),
+                    _buildDetailRow("Mobile Number", "      +91 98765 43210"),
+                    _buildDetailRow("Address", "      Coimbatore"),
 
                     const SizedBox(height: 5),
                   ],

@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'weekly_history.dart';
 import 'check_in.dart';
+import 'check_out.dart';
 import '../main_root.dart';
 
 class AttendanceScreen extends StatefulWidget {
@@ -17,14 +19,27 @@ class AttendanceScreenState extends State<AttendanceScreen> {
   bool breakSwitch = false;
   int bottomNavIndex = 1;
   int selectedTab = 0;
-  bool isCheckedIn = true;
+  bool isCheckedIn = false;
   Timer? breakTimer;
   Duration breakDuration = Duration.zero;
-
+  bool isLoading = false;
+  int uid = 4; // User ID
+  String userName = "User";
 
   @override
   void initState() {
     super.initState();
+    _loadUid();
+  }
+
+  Future<void> _loadUid() async {
+    // API REMOVED: Using local state/defaults
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      uid = 4; // Default UID
+      isCheckedIn = false; // Default status
+      userName = prefs.getString('name') ?? "User";
+    });
   }
 
   @override
@@ -33,6 +48,57 @@ class AttendanceScreenState extends State<AttendanceScreen> {
     super.dispose();
   }
 
+  /// Handle Break In API Call
+  Future<void> handleBreakIn() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    // API REMOVED: Simulation success
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    setState(() {
+      breakSwitch = true;
+      isLoading = false;
+    });
+    startBreakTimer();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Break started successfully'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  /// Handle Break Out API Call
+  Future<void> handleBreakOut() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    // API REMOVED: Simulation success
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    setState(() {
+      breakSwitch = false;
+      isLoading = false;
+    });
+    stopBreakTimer();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Break ended successfully'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 
   void startBreakTimer() {
     breakTimer?.cancel();
@@ -47,111 +113,13 @@ class AttendanceScreenState extends State<AttendanceScreen> {
     breakTimer?.cancel();
   }
 
-  void _showCheckOutDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      useRootNavigator: true,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Are you sure want to Check Out?",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                Row(
-                  children: [
-                    /// NO BUTTON
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.black54),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: Text(
-                          "NO",
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-
-                          setState(() {
-                            isCheckedIn = false;
-                          });
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Checked out successfully"),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF26A69A),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          "YES",
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-
   String formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
     return "$minutes:$seconds";
   }
+
   BoxDecoration cardDecoration() {
     return BoxDecoration(
       color: Color(0xffEFEFEF),
@@ -184,7 +152,7 @@ class AttendanceScreenState extends State<AttendanceScreen> {
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const MainRoot()),
-                  (route) => false,
+              (route) => false,
             );
           },
         ),
@@ -202,7 +170,10 @@ class AttendanceScreenState extends State<AttendanceScreen> {
 
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: h * 0.02),
+          padding: EdgeInsets.symmetric(
+            horizontal: w * 0.04,
+            vertical: h * 0.02,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -221,13 +192,11 @@ class AttendanceScreenState extends State<AttendanceScreen> {
       ),
     );
   }
+
   Widget todayWorkProgressCard(double w, double h) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: w * 0.04,
-        vertical: h * 0.018,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: h * 0.018),
       decoration: BoxDecoration(
         color: const Color(0xffF1F1F1),
         borderRadius: BorderRadius.circular(14),
@@ -254,14 +223,10 @@ class AttendanceScreenState extends State<AttendanceScreen> {
 
               const Text(
                 "Today Work Progress Report",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
               ),
             ],
           ),
-
 
           const Icon(
             Icons.trending_up_outlined,
@@ -281,8 +246,10 @@ class AttendanceScreenState extends State<AttendanceScreen> {
           children: [
             Image.asset("assets/time.png", width: 26, height: 26),
             SizedBox(width: w * 0.02),
-            const Text("Time Tracking",
-                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18)),
+            const Text(
+              "Time Tracking",
+              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
+            ),
           ],
         ),
         SizedBox(height: h * 0.02),
@@ -290,8 +257,8 @@ class AttendanceScreenState extends State<AttendanceScreen> {
         if (!isCheckedIn)
           checkInOutButton(
             label: "Attendance In",
-            color: Colors.green,
-            borderColor: Colors.green.shade200,
+            color: const Color(0xFF4CAF50),
+            borderColor: const Color(0xFF4CAF50).withOpacity(0.4),
             icon: Icons.login,
             w: w,
             h: h,
@@ -307,13 +274,6 @@ class AttendanceScreenState extends State<AttendanceScreen> {
                 setState(() {
                   isCheckedIn = true;
                 });
-
-                // ScaffoldMessenger.of(context).showSnackBar(
-                //   const SnackBar(
-                //     content: Text("Checked in successfully"),
-                //     backgroundColor: Colors.green,
-                //   ),
-                // );
               }
             },
           ),
@@ -321,14 +281,26 @@ class AttendanceScreenState extends State<AttendanceScreen> {
         if (isCheckedIn)
           checkInOutButton(
             label: "Attendance Out",
-            color: Colors.red,
-            borderColor: Colors.red.shade200,
+            color: const Color(0xFFF44336),
+            borderColor: const Color(0xFFF44336).withOpacity(0.4),
             icon: Icons.logout,
             w: w,
             h: h,
-            onTap:_showCheckOutDialog,
-          ),
+            onTap: () async {
+              final result = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CheckOutVerificationScreen(),
+                ),
+              );
 
+              if (result == true) {
+                setState(() {
+                  isCheckedIn = false;
+                });
+              }
+            },
+          ),
 
         SizedBox(height: h * 0.014),
 
@@ -349,7 +321,6 @@ class AttendanceScreenState extends State<AttendanceScreen> {
         //   },
         // ),
         // SizedBox(height: h * 0.018),
-
         breakButton(w, h),
 
         SizedBox(height: h * 0.02),
@@ -357,7 +328,11 @@ class AttendanceScreenState extends State<AttendanceScreen> {
         Center(
           child: const Text(
             "Make sure your location and camera \n  permissions are enabled",
-            style: TextStyle(color: Colors.grey, fontSize: 15,fontWeight: FontWeight.w500),
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
 
@@ -367,14 +342,16 @@ class AttendanceScreenState extends State<AttendanceScreen> {
       ],
     );
   }
+
   Widget activityCard(
-      double w, double h, {
-        required String day,
-        required String time,
-        required String status,
-        required String duration,
-        required Color statusColor,
-      }) {
+    double w,
+    double h, {
+    required String day,
+    required String time,
+    required String status,
+    required String duration,
+    required Color statusColor,
+  }) {
     return Container(
       padding: EdgeInsets.all(w * 0.04),
       decoration: cardDecoration(),
@@ -384,13 +361,18 @@ class AttendanceScreenState extends State<AttendanceScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(day,
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w700)),
+                Text(
+                  day,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 SizedBox(height: h * 0.004),
-                Text(time,
-                    style: TextStyle(
-                        color: Colors.grey.shade700, fontSize: 13)),
+                Text(
+                  time,
+                  style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                ),
               ],
             ),
           ),
@@ -399,7 +381,9 @@ class AttendanceScreenState extends State<AttendanceScreen> {
             children: [
               Container(
                 padding: EdgeInsets.symmetric(
-                    horizontal: w * 0.03, vertical: h * 0.004),
+                  horizontal: w * 0.03,
+                  vertical: h * 0.004,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -408,24 +392,27 @@ class AttendanceScreenState extends State<AttendanceScreen> {
                 child: Text(
                   status,
                   style: TextStyle(
-                      color: statusColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600),
+                    color: statusColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               SizedBox(height: h * 0.004),
-              Text(duration,
-                  style: TextStyle(
-                      color: Colors.grey.shade700,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600)),
+              Text(
+                duration,
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ],
       ),
     );
   }
-
 
   Widget checkInOutButton({
     required String label,
@@ -443,7 +430,7 @@ class AttendanceScreenState extends State<AttendanceScreen> {
           elevation: 0,
           backgroundColor: Colors.white,
           foregroundColor: color,
-          padding: EdgeInsets.symmetric(vertical: h * 0.010),
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(color: borderColor, width: 1),
@@ -451,12 +438,30 @@ class AttendanceScreenState extends State<AttendanceScreen> {
         ),
         onPressed: onTap,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(icon, size: h * 0.028, color: color),
-            SizedBox(width: w * 0.03),
-            Text(label,
-                style:
-                const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, size: 24, color: color),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    color: color.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            ),
+            Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xff90BD83)),
           ],
         ),
       ),
@@ -470,53 +475,68 @@ class AttendanceScreenState extends State<AttendanceScreen> {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: const Color(0xff727272),
+          backgroundColor: isLoading
+              ? Colors.grey.shade400
+              : const Color(0xff727272),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        onPressed: () {
-          setState(() {
-            breakSwitch = !breakSwitch;
-
-            if (breakSwitch) {
-              startBreakTimer();
-            } else {
-              stopBreakTimer();
-            }
-          });
-        },
+        onPressed: isLoading
+            ? null
+            : () async {
+                if (breakSwitch) {
+                  // Break Out
+                  await handleBreakOut();
+                } else {
+                  // Break In
+                  await handleBreakIn();
+                }
+              },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               children: [
-                const Icon(Icons.coffee_outlined, color: Colors.white),
+                if (isLoading)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                else
+                  const Icon(Icons.coffee_outlined, color: Colors.white),
                 const SizedBox(width: 10),
                 Text(
-                  "Break In (${formatDuration(breakDuration)})",
+                  isLoading
+                      ? "Processing..."
+                      : breakSwitch
+                      ? "Break Out (${formatDuration(breakDuration)})"
+                      : "Break In (${formatDuration(breakDuration)})",
                   style: const TextStyle(color: Colors.white),
                 ),
               ],
             ),
-            Switch(
-              value: breakSwitch,
-              activeColor: Color(0xffD9D9D9),
-              activeTrackColor: Color(0xff1B2C61),
-              inactiveThumbColor: Color(0xffD9D9D9),
-              inactiveTrackColor: Colors.grey.shade500,
-              onChanged: (value) {
-                setState(() {
-                  breakSwitch = value;
-
-                  if (breakSwitch) {
-                    startBreakTimer();
+            if (!isLoading)
+              Switch(
+                value: breakSwitch,
+                activeColor: const Color(0xffD9D9D9),
+                activeTrackColor: const Color(0xff1B2C61),
+                inactiveThumbColor: const Color(0xffD9D9D9),
+                inactiveTrackColor: Colors.grey.shade500,
+                onChanged: (value) async {
+                  if (value) {
+                    // Break In
+                    await handleBreakIn();
                   } else {
-                    stopBreakTimer();
+                    // Break Out
+                    await handleBreakOut();
                   }
-                });
-              },
-            ),
+                },
+              ),
           ],
         ),
       ),
@@ -524,12 +544,12 @@ class AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Widget _infoSmallCard(
-      double w,
-      double h, {
-        required IconData icon,
-        required String title,
-        required String subtitle,
-      }) {
+    double w,
+    double h, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
     return Container(
       padding: EdgeInsets.all(w * 0.04),
       decoration: cardDecoration(),
@@ -578,9 +598,9 @@ class AttendanceScreenState extends State<AttendanceScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Good Morning, Akhil Mohan!",
-                      style: TextStyle(
+                    Text(
+                      "Good Morning, $userName!",
+                      style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
                       ),
@@ -601,7 +621,9 @@ class AttendanceScreenState extends State<AttendanceScreen> {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
@@ -620,8 +642,8 @@ class AttendanceScreenState extends State<AttendanceScreen> {
                         Container(
                           width: 8,
                           height: 8,
-                          decoration: const BoxDecoration(
-                            color: Colors.green,
+                          decoration: BoxDecoration(
+                            color: isCheckedIn ? Colors.green : Colors.grey,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -629,12 +651,12 @@ class AttendanceScreenState extends State<AttendanceScreen> {
                         const SizedBox(width: 6),
 
                         // Checked In text
-                        const Text(
-                          "Checked In",
+                        Text(
+                          isCheckedIn ? "Checked In" : "Not Checked In",
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
-                            color: Colors.green,
+                            color: isCheckedIn ? Colors.green : Colors.grey,
                           ),
                         ),
                       ],
@@ -652,7 +674,6 @@ class AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-
   Widget dateBox(double w, double h) {
     return Container(
       padding: EdgeInsets.all(w * 0.04),
@@ -667,15 +688,17 @@ class AttendanceScreenState extends State<AttendanceScreen> {
             children: [
               Icon(Icons.calendar_today, size: 18),
               SizedBox(width: 6),
-              Text("Current Date",
-                  style: TextStyle(fontSize: 12, color: Colors.black54)),
+              Text(
+                "Current Date",
+                style: TextStyle(fontSize: 12, color: Colors.black54),
+              ),
             ],
           ),
           SizedBox(height: 8),
           Text(
             "Thursday,\nNov 20, 2025",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          )
+          ),
         ],
       ),
     );
@@ -693,16 +716,29 @@ class AttendanceScreenState extends State<AttendanceScreen> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text("Current Shift",
-                    style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold, color: Colors.black54)),
+              children: [
+                const Text(
+                  "Current Shift",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54,
+                  ),
+                ),
                 SizedBox(height: 4),
-                Text("Day Shift",
-                    style:
-                    TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                SizedBox(height: 2),
-                Text("09:00 - 18:00",
-                    style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold, color: Colors.black54)),
+                const Text(
+                  "Day Shift",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  isCheckedIn ? "09:00 - 18:00" : "--:--",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54,
+                  ),
+                ),
               ],
             ),
           ),
@@ -711,12 +747,20 @@ class AttendanceScreenState extends State<AttendanceScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Break Duration",
-                    style: TextStyle(fontSize: 14,fontWeight: FontWeight.w500, color: Colors.black54)),
+                const Text(
+                  "Break Duration",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black54,
+                  ),
+                ),
                 SizedBox(height: 6),
                 Container(
                   padding: EdgeInsets.symmetric(
-                      horizontal: w * 0.05, vertical: h * 0.01),
+                    horizontal: w * 0.05,
+                    vertical: h * 0.01,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(10),
@@ -744,8 +788,10 @@ class AttendanceScreenState extends State<AttendanceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Attendance Progress",
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+          const Text(
+            "Attendance Progress",
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+          ),
           SizedBox(height: h * 0.015),
 
           // TABS
@@ -754,12 +800,8 @@ class AttendanceScreenState extends State<AttendanceScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.grey,
-                width: 1,
-              )
+              border: Border.all(color: Colors.grey, width: 1),
             ),
-
 
             child: Row(
               children: [
@@ -776,20 +818,29 @@ class AttendanceScreenState extends State<AttendanceScreen> {
             children: const [
               Icon(Icons.trending_up_outlined),
               SizedBox(width: 8),
-              Text("This Week's Progress",
-                  style: TextStyle(fontWeight: FontWeight.w700)),
+              Text(
+                "This Week's Progress",
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
             ],
           ),
-
 
           SizedBox(height: h * 0.02),
 
           if (selectedTab == 0)
             Row(
               children: [
-                Expanded(child: statsBox("Total Hours", "38h 30m",valueColor: Colors.black)),
+                Expanded(
+                  child: statsBox(
+                    "Total Hours",
+                    "38h 30m",
+                    valueColor: Colors.black,
+                  ),
+                ),
                 SizedBox(width: w * 0.03),
-                Expanded(child: statsBox("Overtime", "2h 15m",valueColor: Colors.red)),
+                Expanded(
+                  child: statsBox("Overtime", "2h 15m", valueColor: Colors.red),
+                ),
               ],
             )
           else
@@ -799,7 +850,13 @@ class AttendanceScreenState extends State<AttendanceScreen> {
                   children: [
                     Expanded(child: monthlyStatBox("Day Worked", "22")),
                     SizedBox(width: w * 0.03),
-                    Expanded(child: monthlyStatBox("Leave Taken", "2", highlight: true)),
+                    Expanded(
+                      child: monthlyStatBox(
+                        "Leave Taken",
+                        "2",
+                        highlight: true,
+                      ),
+                    ),
                   ],
                 ),
                 SizedBox(height: h * 0.02),
@@ -807,7 +864,13 @@ class AttendanceScreenState extends State<AttendanceScreen> {
                   children: [
                     Expanded(child: monthlyStatBox("LOP", "2")),
                     SizedBox(width: w * 0.03),
-                    Expanded(child: monthlyStatBox("Overtime", "2h 15m", highlight: true)),
+                    Expanded(
+                      child: monthlyStatBox(
+                        "Overtime",
+                        "2h 15m",
+                        highlight: true,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -819,27 +882,20 @@ class AttendanceScreenState extends State<AttendanceScreen> {
             children: const [
               Text(
                 "Attendance Progress",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
               Text(
                 "4/6 days",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
             ],
           ),
 
           SizedBox(height: h * 0.01),
-          LinearProgressIndicator(
-            value: 0.66,
-            minHeight: 8,
-            color: Colors.black,
-            backgroundColor: Colors.grey.shade300,
+          Image.asset(
+            "assets/attendance_progress.png",
+            width: double.infinity,
+            fit: BoxFit.contain,
           ),
           SizedBox(height: h * 0.01),
           Row(
@@ -873,13 +929,25 @@ class AttendanceScreenState extends State<AttendanceScreen> {
                 backgroundColor: teal,
                 padding: EdgeInsets.symmetric(vertical: h * 0.014),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => AttendanceHistoryScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AttendanceHistoryScreen(),
+                  ),
+                );
               },
-              child: const Text("Attendance History",
-                  style: TextStyle(fontSize:16,fontWeight:FontWeight.w700,color: Colors.white)),
+              child: const Text(
+                "Attendance History",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ],
@@ -892,7 +960,7 @@ class AttendanceScreenState extends State<AttendanceScreen> {
       padding: const EdgeInsets.symmetric(vertical: 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: Color(0xffEFEFEF),width: 2),
+        border: Border.all(color: Color(0xffEFEFEF), width: 2),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -926,7 +994,6 @@ class AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-
   Widget tabButton(String text, int index) {
     return GestureDetector(
       onTap: () => setState(() => selectedTab = index),
@@ -950,10 +1017,10 @@ class AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Widget statsBox(
-      String title,
-      String value, {
-        Color valueColor = Colors.black,
-      }) {
+    String title,
+    String value, {
+    Color valueColor = Colors.black,
+  }) {
     final bool isOvertime = title.toLowerCase().contains("overtime");
 
     final Color finalColor = isOvertime ? Colors.red : valueColor;

@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hrm/views/widgets/profile_card.dart';
@@ -39,15 +37,15 @@ class ExpenseManagementScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 16),
 
-            // ==================== PROFILE CARD ====================
-            ProfileInfoCard(
-              name: "Harish",
-              employeeId: "1023",
-              designation: "Supervisor",
-              profileImagePath: "assets/profile.png",
-            ),
+            // // ==================== PROFILE CARD ====================
+            // ProfileInfoCard(
+            //   name: "Harish",
+            //   employeeId: "1023",
+            //   designation: "Supervisor",
+            //   profileImagePath: "assets/profile.png",
+            // ),
 
-            const SizedBox(height: 20),
+            // const SizedBox(height: 20),
 
             // ==================== SUMMARY CARDS ====================
             Row(

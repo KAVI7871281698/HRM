@@ -48,15 +48,14 @@ class _AddExpenseState extends State<AddExpense> {
           children: [
             const SizedBox(height: 12),
 
-            ProfileInfoCard(
-              name: "Harish",
-              employeeId: "1023",
-              designation: "Supervisor",
-              profileImagePath: "assets/profile.png",
-            ),
+            // ProfileInfoCard(
+            //   name: "Harish",
+            //   employeeId: "1023",
+            //   designation: "Supervisor",
+            //   profileImagePath: "assets/profile.png",
+            // ),
 
-            SizedBox(height: isTablet ? 30 : 20),
-
+            // SizedBox(height: isTablet ? 30 : 20),
             _buildDropdownField(
               context: context,
               label: "Expense Category",
@@ -226,15 +225,31 @@ class _AddExpenseState extends State<AddExpense> {
           onTap: isDateField ? () => _selectDate(context) : null,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.poppins(color: Colors.grey.shade500, fontSize: isTablet ? 14 : 13),
+            hintStyle: GoogleFonts.poppins(
+              color: Colors.grey.shade500,
+              fontSize: isTablet ? 14 : 13,
+            ),
             prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, color: const Color(0xFF26A69A), size: isTablet ? 22 : 20)
+                ? Icon(
+                    prefixIcon,
+                    color: const Color(0xFF26A69A),
+                    size: isTablet ? 22 : 20,
+                  )
                 : null,
             filled: true,
             fillColor: Colors.white,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: isTablet ? 16 : 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: isTablet ? 16 : 14,
+            ),
           ),
           style: GoogleFonts.poppins(fontSize: isTablet ? 14 : 13),
         ),
@@ -254,7 +269,14 @@ class _AddExpenseState extends State<AddExpense> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.poppins(fontSize: isTablet ? 16 : 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: isTablet ? 16 : 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -267,8 +289,18 @@ class _AddExpenseState extends State<AddExpense> {
             child: DropdownButton<String>(
               value: value,
               isExpanded: true,
-              hint: Text(hint, style: GoogleFonts.poppins(color: Colors.grey.shade500)),
-              items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: GoogleFonts.poppins()))).toList(),
+              hint: Text(
+                hint,
+                style: GoogleFonts.poppins(color: Colors.grey.shade500),
+              ),
+              items: items
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(e, style: GoogleFonts.poppins()),
+                    ),
+                  )
+                  .toList(),
               onChanged: onChanged,
             ),
           ),
@@ -284,7 +316,9 @@ class _AddExpenseState extends State<AddExpense> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
       builder: (context, child) => Theme(
-        data: ThemeData.light().copyWith(colorScheme: const ColorScheme.light(primary: Color(0xFF26A69A))),
+        data: ThemeData.light().copyWith(
+          colorScheme: const ColorScheme.light(primary: Color(0xFF26A69A)),
+        ),
         child: child!,
       ),
     );
@@ -300,20 +334,23 @@ class _AddExpenseState extends State<AddExpense> {
     final amount = _amountController.text.trim();
     final purpose = _selectedPurpose ?? "Expense";
 
-    // if (amount.isEmpty || _selectedPurpose == null || _dateController.text.isEmpty) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(content: Text("Please fill all required fields"), backgroundColor: Colors.red),
-    //   );
-    //   return;
-    // }
+    if (amount.isEmpty ||
+        _selectedPurpose == null ||
+        _descriptionController.text.trim().isEmpty ||
+        _dateController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please fill all required fields"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => SuccessExpenseDialog(
-        amount: amount,
-        purpose: purpose,
-      ),
+      builder: (_) => SuccessExpenseDialog(amount: amount, purpose: purpose),
     );
 
     // Auto close dialog + go back after 2.5 seconds
@@ -347,58 +384,44 @@ class SuccessExpenseDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final isTablet = width > 600;
-
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-      elevation: 16,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 0,
+      backgroundColor: Colors.transparent,
       child: Container(
-        padding: EdgeInsets.all(isTablet ? 40 : 32),
-        constraints: const BoxConstraints(maxWidth: 380),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Green Checkmark
-            Container(
-              width: 75,
-              height: 50,
-              decoration: const BoxDecoration(
-                color: Color(0xff34C759),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.check, color: Colors.white, size: 52),
-            ),
+            // Custom Success Image
+            Image.asset('assets/ticket_success.png', height: 80, width: 80),
 
-            const SizedBox(height: 28),
+            const SizedBox(height: 32),
 
+            // Success Text
             Text(
               "Your Expense For '$purpose' Worth",
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
-                fontSize: isTablet ? 19 : 17,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            Text(
-              "₹ $amount Has Been Submitted",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: isTablet ? 24 : 22,
+                fontSize: 18,
                 fontWeight: FontWeight.w500,
                 color: Colors.black,
               ),
             ),
-
-            const SizedBox(height: 32),
+            const SizedBox(height: 8),
+            Text(
+              "₹$amount Has Been Submitted",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
           ],
         ),
       ),

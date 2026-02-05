@@ -1,27 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hrm/views/home/security.dart';
-import 'package:hrm/views/widgets/profile_card.dart';
 import '../main_root.dart';
 import 'account_setting.dart';
 import 'expense.dart';
 import 'feedback.dart';
 import 'notification_alert.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
 
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _allowLocation = true;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Color(0xFF26A69A),
+        backgroundColor: const Color(0xFF26A69A),
         foregroundColor: Colors.white,
-        elevation: 1,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -39,124 +42,106 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xff465583), // Your dark blue background
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(color: Color(0xFF465583)),
                 child: Row(
                   children: [
-                    // Profile Image
-                    const CircleAvatar(
-                      radius: 34,
-                      backgroundImage: AssetImage('assets/profile.png'),
+                    Container(
+                      width: 70,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                        image: const DecorationImage(
+                          image: AssetImage('assets/profile.png'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 16),
-
-                    // Name + ID + View Profile
+                    const SizedBox(width: 15),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Name with Edit Icon
                           Row(
                             children: [
                               Text(
                                 'Harish',
                                 style: GoogleFonts.poppins(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
                                   color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Edit',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w500,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Icon(
-                                    Icons.edit_outlined,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                ],
+                              const Text(
+                                'Edit',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(
+                                Icons.edit,
+                                color: Colors.white70,
+                                size: 12,
                               ),
                             ],
                           ),
                           const SizedBox(height: 4),
-
                           Text(
-                            '1122334455',
+                            '1122333444',
                             style: GoogleFonts.poppins(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white70,
+                              color: Colors.white,
+                              fontSize: 14,
                             ),
                           ),
                           const SizedBox(height: 4),
-
-                          Text(
-                            'View Full Profile',
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              color: Colors.white,
-                              // decoration: TextDecoration.underline,
-                            ),
+                          Row(
+                            children: [
+                              const Text(
+                                'View Full Profile',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF4CAF50),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  'Active',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                    ),
-
-                    SizedBox(width: 3),
-
-                    Container(
-                      margin: EdgeInsets.only(top: 50, right: 80),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Color(0xff30AC4B),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        'Active',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 10),
-
-              // Account Setting Section
-              _buildAccountSettingSection(context),
+              _buildAccountSettingSection(),
             ],
           ),
         ),
@@ -164,162 +149,133 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAccountSettingSection(BuildContext context) {
+  Widget _buildAccountSettingSection() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 3),
-        // Settings Options with Dividers
         _buildSettingOption(
-          context,
           "Account Setting",
           "assets/account.png",
-          false,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AccountSettingsApp()),
+          ),
         ),
-        const Divider(height: 1, color: Colors.grey),
-
+        const Divider(height: 1, indent: 20, endIndent: 20),
         _buildSettingOption(
-          context,
           "Notification & Alerts",
           "assets/notification.png",
-          false,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NotificationSettingsScreen(),
+            ),
+          ),
         ),
-        const Divider(height: 1, color: Colors.grey),
-
+        const Divider(height: 1, indent: 20, endIndent: 20),
         _buildSettingOptionWithToggle(
-          context,
           "Allow Location",
           "assets/location.png",
-          true,
+          _allowLocation,
+          (val) => setState(() => _allowLocation = val),
         ),
-        const Divider(height: 1, color: Colors.grey),
-
-        _buildSettingOption(context, "Feedback", "assets/feedback.png", false),
-        const Divider(height: 1, color: Colors.grey),
-
-        _buildSettingOption(context, "Expense", "assets/expense.png", false),
-        const Divider(height: 1, color: Colors.grey),
-
-        _buildSettingOption(context, "Security", "assets/security.png", false),
-        const Divider(height: 1, color: Colors.grey),
-
+        const Divider(height: 1, indent: 20, endIndent: 20),
         _buildSettingOption(
-          context,
+          "Feedback",
+          "assets/feedback.png",
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const FeedbackSupportScreen(),
+            ),
+          ),
+        ),
+        const Divider(height: 1, indent: 20, endIndent: 20),
+        _buildSettingOption(
+          "Expense",
+          "assets/expense.png",
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ExpenseManagementScreen(),
+            ),
+          ),
+        ),
+        const Divider(height: 1, indent: 20, endIndent: 20),
+        _buildSettingOption(
+          "Security",
+          "assets/security.png",
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SecuritySettingsApp(),
+            ),
+          ),
+        ),
+        const Divider(height: 1, indent: 20, endIndent: 20),
+        _buildSettingOption(
           "Logout",
           "assets/logout.png",
-          false,
           isLogout: true,
+          onTap: () => _showLogoutConfirmation(context),
         ),
-        const Divider(height: 1, color: Colors.grey),
+        const Divider(height: 1, indent: 20, endIndent: 20),
       ],
     );
   }
 
   Widget _buildSettingOption(
-    BuildContext context,
     String title,
-    String iconPath,
-    bool isEnabled, {
+    String iconPath, {
+    required VoidCallback onTap,
     bool isLogout = false,
   }) {
-    return Container(
-      color: Colors.white,
-      child: ListTile(
-        leading: Container(
-          width: 40,
-          height: 40,
-          child: Center(child: Image.asset(iconPath, width: 24, height: 24)),
+    return ListTile(
+      leading: Image.asset(iconPath, width: 24, height: 24),
+      title: Text(
+        title,
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: isLogout ? Colors.red : Colors.black87,
         ),
-        title: Text(
-          title,
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: isLogout ? Colors.red : Colors.black87,
-          ),
-        ),
-        trailing: isLogout
-            ? null
-            : const Icon(Icons.chevron_right, color: Colors.grey),
-        onTap: () {
-          if (isLogout) {
-            _showLogoutConfirmation(context);
-          } else if (title == "Expense") {
-            // Navigate to Expense Management Screen
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ExpenseManagementScreen(),
-              ),
-            );
-          } else if (title == "Notification & Alerts") {
-            // Navigate to Expense Management Screen
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const NotificationSettingsScreen(),
-              ),
-            );
-          } else if (title == "Account Setting") {
-            // Navigate to Expense Management Screen
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AccountSettingsApp(),
-              ),
-            );
-          }
-          else if (title == "Feedback") {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const FeedbackSupportScreen(),
-              ),
-            );
-          }
-          else if (title == "Security") {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const SecuritySettingsApp(),
-              ),
-            );
-          }
-          },
-        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
       ),
+      trailing: isLogout
+          ? null
+          : const Icon(Icons.chevron_right, color: Colors.grey),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
     );
   }
 
   Widget _buildSettingOptionWithToggle(
-    BuildContext context,
     String title,
     String iconPath,
-    bool isEnabled,
+    bool value,
+    ValueChanged<bool> onChanged,
   ) {
-    return Container(
-      color: Colors.white,
-      child: ListTile(
-        leading: Container(
-          width: 40,
-          height: 40,
-          child: Center(child: Image.asset(iconPath, width: 24, height: 24)),
+    return ListTile(
+      leading: Image.asset(iconPath, width: 24, height: 24),
+      title: Text(
+        title,
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black87,
         ),
-        title: Text(
-          title,
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-        ),
-        trailing: Switch(
-          value: isEnabled,
-          onChanged: (value) {},
-          activeColor: const Color(0xff465583),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
       ),
+      trailing: Transform.scale(
+        scale: 0.8,
+        child: Switch(
+          value: value,
+          onChanged: onChanged,
+          activeColor: const Color(0xFF233E94), // Dark blue thumb
+          activeTrackColor: const Color(0xFFD1D5DB), // Light grey track
+          inactiveThumbColor: const Color(0xFF9CA3AF),
+          inactiveTrackColor: const Color(0xFFE5E7EB),
+          trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+        ),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
     );
   }
 
@@ -350,20 +306,17 @@ class SettingsScreen extends StatelessWidget {
                     color: Colors.black,
                   ),
                 ),
-
                 const SizedBox(height: 25),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // NO BUTTON
                     Expanded(
                       child: SizedBox(
                         height: 45,
                         child: OutlinedButton(
                           onPressed: () => Navigator.pop(context),
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: Colors.black54),
+                            side: const BorderSide(color: Colors.black54),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -379,10 +332,7 @@ class SettingsScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     const SizedBox(width: 15),
-
-                    // YES BUTTON
                     Expanded(
                       child: SizedBox(
                         height: 45,
@@ -392,7 +342,7 @@ class SettingsScreen extends StatelessWidget {
                             // Add your logout logic here
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xff233E94),
+                            backgroundColor: const Color(0xff233E94),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -410,11 +360,12 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),
         );
       },
     );
-  }}
+  }
+}

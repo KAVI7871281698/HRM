@@ -45,16 +45,15 @@ class _TicketRaiseState extends State<TicketRaise> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 16),
+            //const SizedBox(height: 16),
 
-            // Profile Card
-            ProfileInfoCard(
-              name: "Harish",
-              employeeId: "1023",
-              designation: "Supervisor",
-              profileImagePath: "assets/profile.png",
-            ),
-
+            // // Profile Card
+            // ProfileInfoCard(
+            //   name: "Harish",
+            //   employeeId: "1023",
+            //   designation: "Supervisor",
+            //   profileImagePath: "assets/profile.png",
+            // ),
             SizedBox(height: isTablet ? 32 : 24),
 
             // Subject Field
@@ -215,16 +214,24 @@ class _TicketRaiseState extends State<TicketRaise> {
             child: DropdownButton<String>(
               value: value,
               isExpanded: true,
-              hint: Text(hint, style: GoogleFonts.poppins(color: Colors.grey.shade500)),
+              hint: Text(
+                hint,
+                style: GoogleFonts.poppins(color: Colors.grey.shade500),
+              ),
               items: items
-                  .map((e) => DropdownMenuItem(
-                value: e,
-                child: Text(e, style: GoogleFonts.poppins()),
-              ))
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(e, style: GoogleFonts.poppins()),
+                    ),
+                  )
                   .toList(),
               onChanged: onChanged,
               dropdownColor: Colors.white,
-              icon: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey.shade600),
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: Colors.grey.shade600,
+              ),
             ),
           ),
         ),
@@ -285,64 +292,41 @@ class SuccessTicketDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = MediaQuery.of(context).size.width > 600;
-
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-      elevation: 20,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 0,
+      backgroundColor: Colors.transparent,
       child: Container(
-        padding: EdgeInsets.all(isTablet ? 40 : 32),
-        constraints: const BoxConstraints(maxWidth: 380),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Green Checkmark
-            Container(
-              width: 75,
-              height: 50,
-              decoration: const BoxDecoration(
-                color: Color(0xff34C759),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.check, color: Colors.white, size: 52),
-            ),
+            // Custom Success Image
+            Image.asset('assets/ticket_success.png', height: 80, width: 80),
+            const SizedBox(height: 32),
 
-            const SizedBox(height: 28),
-
+            // Success Text
             Text(
-              "Ticket Raised Successfully!",
+              "Your Ticket For '$subject'",
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
-                fontSize: isTablet ? 22 : 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            Text(
-              "Subject: $subject",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: isTablet ? 17 : 15,
-                color: Colors.black87,
-              ),
-            ),
-
             const SizedBox(height: 8),
-
             Text(
-              "Department: $department",
+              "Has Been Submitted",
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
-                fontSize: isTablet ? 17 : 15,
-                color: const Color(0xFF26A69A),
-                fontWeight: FontWeight.w600,
+                fontSize: 24,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
               ),
             ),
           ],

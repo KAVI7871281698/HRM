@@ -7,21 +7,22 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 
-class CheckInVerificationScreen extends StatefulWidget {
-  const CheckInVerificationScreen({super.key});
+class CheckOutVerificationScreen extends StatefulWidget {
+  const CheckOutVerificationScreen({super.key});
 
   @override
-  State<CheckInVerificationScreen> createState() =>
-      _CheckInVerificationScreenState();
+  State<CheckOutVerificationScreen> createState() =>
+      _CheckOutVerificationScreenState();
 }
 
-class _CheckInVerificationScreenState extends State<CheckInVerificationScreen> {
-  final TextEditingController inTimeController = TextEditingController();
+class _CheckOutVerificationScreenState
+    extends State<CheckOutVerificationScreen> {
+  final TextEditingController outTimeController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
 
   String selectedMode = 'Mode of work';
   bool isLoading = false;
-  int? uid;
+  int uid = 4;
 
   File? _image;
   final ImagePicker _picker = ImagePicker();
@@ -36,7 +37,7 @@ class _CheckInVerificationScreenState extends State<CheckInVerificationScreen> {
   Future<void> _fetchLocationAndTime() async {
     // 1. Set Current Time
     final now = DateTime.now();
-    inTimeController.text = DateFormat('hh:mm a').format(now);
+    outTimeController.text = DateFormat('hh:mm a').format(now);
 
     // 2. Fetch Location
     setState(() {
@@ -121,7 +122,7 @@ class _CheckInVerificationScreenState extends State<CheckInVerificationScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Check in Verification',
+          'Check out Verification',
           style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w500),
         ),
       ),
@@ -135,14 +136,15 @@ class _CheckInVerificationScreenState extends State<CheckInVerificationScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Check in Verification',
+                'Check out Verification',
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 16),
 
-              _label('In Time'),
+              /// Out Time
+              _label('Out Time'),
               _textField(
-                controller: inTimeController,
+                controller: outTimeController,
                 hint: 'Tap to select time',
                 readOnly: true,
                 onTap: _pickTime,
@@ -150,6 +152,7 @@ class _CheckInVerificationScreenState extends State<CheckInVerificationScreen> {
               ),
               const SizedBox(height: 14),
 
+              /// Location
               _label('Location'),
               _textField(
                 controller: locationController,
@@ -158,13 +161,16 @@ class _CheckInVerificationScreenState extends State<CheckInVerificationScreen> {
               ),
               const SizedBox(height: 14),
 
+              /// Work Mode
               _label('Work Mode'),
               _dropdownField(),
               const SizedBox(height: 18),
 
+              /// Selfie
               _selfieCard(size),
               SizedBox(height: size.height * 0.1),
 
+              /// Submit Button
               Center(
                 child: SizedBox(
                   width: size.width * 0.55,
@@ -207,9 +213,201 @@ class _CheckInVerificationScreenState extends State<CheckInVerificationScreen> {
     );
   }
 
-  Future<void> _submit() async {
-    if (uid == null ||
-        inTimeController.text.isEmpty ||
+  /// ---------- UI Helpers ----------
+
+  Widget _label(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
+  Widget _textField({
+    required TextEditingController controller,
+    required String hint,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    IconData? prefixIcon,
+  }) {
+    return SizedBox(
+      height: 44,
+      child: TextField(
+        controller: controller,
+        readOnly: readOnly,
+        onTap: onTap,
+        decoration: InputDecoration(
+          hintText: hint,
+          prefixIcon: prefixIcon != null
+              ? Icon(prefixIcon, color: const Color(0xFF26A69A), size: 22)
+              : null,
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 10,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: Color(0xFF2AA89A)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: Color(0xFF2AA89A)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: Color(0xFF2AA89A)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _dropdownField() {
+    return SizedBox(
+      height: 44,
+      child: DropdownButtonFormField<String>(
+        value: selectedMode,
+        items: const [
+          DropdownMenuItem(value: 'Mode of work', child: Text('Mode of work')),
+          DropdownMenuItem(value: 'Office', child: Text('Office')),
+          DropdownMenuItem(
+            value: 'Work From Home',
+            child: Text('Work From Home'),
+          ),
+        ],
+        onChanged: (value) {
+          setState(() {
+            selectedMode = value!;
+          });
+        },
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFFD7FFFA),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 10,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        icon: const Icon(Icons.keyboard_arrow_down),
+      ),
+    );
+  }
+
+  Widget _selfieCard(Size size) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Selfie Verification',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 12),
+          Center(
+            child: DottedBorder(
+              color: Colors.grey.shade400,
+              strokeWidth: 1.5,
+              dashPattern: const [6, 4],
+              borderType: BorderType.RRect,
+              radius: const Radius.circular(8),
+              child: Container(
+                height: size.height * 0.18,
+                width: 300,
+                child: _image != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
+                          _image!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                        ),
+                      )
+                    : const Center(
+                        child: Icon(
+                          Icons.camera_alt_outlined,
+                          size: 34,
+                          color: Color(0xFF2AA89A),
+                        ),
+                      ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: SizedBox(
+              height: 38,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2AA89A),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                onPressed: _takeSelfie,
+                icon: const Icon(Icons.camera_alt, size: 16),
+                label: Text(
+                  _image == null ? 'Take Selfie' : 'Retake Selfie',
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// ---------- Actions ----------
+
+  Future<void> _takeSelfie() async {
+    final XFile? photo = await _picker.pickImage(
+      source: ImageSource.camera,
+      preferredCameraDevice: CameraDevice.front,
+      imageQuality: 50,
+    );
+
+    if (photo != null) {
+      setState(() {
+        _image = File(photo.path);
+      });
+    }
+  }
+
+  Future<void> _pickTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (picked != null) {
+      outTimeController.text = picked.format(context);
+    }
+  }
+
+  void _submit() async {
+    if (outTimeController.text.isEmpty ||
         locationController.text.isEmpty ||
         selectedMode == 'Mode of work' ||
         _image == null) {
@@ -232,151 +430,11 @@ class _CheckInVerificationScreenState extends State<CheckInVerificationScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Checked in successfully'),
+          content: Text('Checked out successfully'),
           backgroundColor: Color(0xFF2AA89A),
         ),
       );
       Navigator.pop(context, true);
     }
-  }
-
-  Future<void> _pickTime() async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-
-    if (picked != null) {
-      final formattedTime =
-          "${picked.hour}:${picked.minute.toString().padLeft(2, '0')}";
-      setState(() {
-        inTimeController.text = formattedTime;
-      });
-    }
-  }
-
-  Future<void> _takeSelfie() async {
-    final XFile? photo = await _picker.pickImage(
-      source: ImageSource.camera,
-      preferredCameraDevice: CameraDevice.front,
-      imageQuality: 50,
-    );
-
-    if (photo != null) {
-      setState(() {
-        _image = File(photo.path);
-      });
-    }
-  }
-
-  Widget _label(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 6),
-    child: Text(
-      text,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-    ),
-  );
-
-  Widget _textField({
-    required TextEditingController controller,
-    required String hint,
-    bool readOnly = false,
-    VoidCallback? onTap,
-    IconData? prefixIcon,
-  }) {
-    return SizedBox(
-      height: 45,
-      child: TextField(
-        controller: controller,
-        readOnly: readOnly,
-        onTap: onTap,
-        decoration: InputDecoration(
-          hintText: hint,
-          prefixIcon: prefixIcon != null
-              ? Icon(prefixIcon, color: const Color(0xFF26A69A))
-              : null,
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(6),
-            borderSide: const BorderSide(color: Color(0xFF2AA89A)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(6),
-            borderSide: const BorderSide(color: Color(0xFF2AA89A)),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _dropdownField() {
-    return SizedBox(
-      height: 44,
-      child: DropdownButtonFormField<String>(
-        value: selectedMode,
-        items: const [
-          DropdownMenuItem(value: 'Mode of work', child: Text('Mode of work')),
-          DropdownMenuItem(value: 'Office', child: Text('Office')),
-          DropdownMenuItem(
-            value: 'Work From Home',
-            child: Text('Work From Home'),
-          ),
-        ],
-        onChanged: (value) => setState(() => selectedMode = value!),
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: const Color(0xFFD7FFFA),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
-        ),
-      ),
-    );
-  }
-
-  Widget _selfieCard(Size size) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Selfie Verification',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-          Center(
-            child: DottedBorder(
-              color: Colors.grey,
-              dashPattern: const [6, 4],
-              borderType: BorderType.RRect,
-              radius: const Radius.circular(8),
-              child: Container(
-                height: size.height * 0.18,
-                width: 300,
-                child: _image != null
-                    ? Image.file(_image!, fit: BoxFit.cover)
-                    : const Icon(
-                        Icons.camera_alt_outlined,
-                        size: 34,
-                        color: Color(0xFF2AA89A),
-                      ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Center(
-            child: ElevatedButton.icon(
-              onPressed: _takeSelfie,
-              icon: const Icon(Icons.camera_alt, size: 16),
-              label: Text(_image == null ? 'Take Selfie' : 'Retake Selfie'),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
