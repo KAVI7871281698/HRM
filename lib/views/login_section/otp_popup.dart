@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../services/login_api.dart';
+import '../../models/login_api.dart';
 import '../main_root.dart'; // change if needed
 
 class OtpBottomSheet extends StatefulWidget {

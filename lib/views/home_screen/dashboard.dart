@@ -4,7 +4,6 @@ import 'package:hrm/views/home/settings.dart';
 import 'package:hrm/views/home_screen/employee_detail.dart';
 import 'package:hrm/views/home_screen/performance.dart';
 import 'package:hrm/views/home_screen/reports.dart';
-
 import 'leave_management.dart';
 import 'marketing_checkin.dart';
 import 'notification.dart';

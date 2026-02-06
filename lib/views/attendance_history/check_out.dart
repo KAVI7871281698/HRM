@@ -6,6 +6,11 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:convert';
+import 'package:http_parser/http_parser.dart';
 
 class CheckOutVerificationScreen extends StatefulWidget {
   const CheckOutVerificationScreen({super.key});
@@ -22,7 +27,9 @@ class _CheckOutVerificationScreenState
 
   String selectedMode = 'Mode of work';
   bool isLoading = false;
-  int uid = 4;
+  int? uid;
+  String? deviceId;
+  Position? currentPosition;
 
   File? _image;
   final ImagePicker _picker = ImagePicker();
@@ -31,7 +38,20 @@ class _CheckOutVerificationScreenState
   void initState() {
     super.initState();
     _loadUid();
+    _getDeviceId();
     _fetchLocationAndTime();
+  }
+
+  Future<void> _getDeviceId() async {
+    final deviceInfo = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      final androidInfo = await deviceInfo.androidInfo;
+      deviceId = androidInfo.id;
+    } else if (Platform.isIOS) {
+      final iosInfo = await deviceInfo.iosInfo;
+      deviceId = iosInfo.identifierForVendor;
+    }
+    setState(() {});
   }
 
   Future<void> _fetchLocationAndTime() async {
@@ -70,6 +90,7 @@ class _CheckOutVerificationScreenState
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
+      currentPosition = position;
 
       // Reverse geocoding to get address
       List<Placemark> placemarks = await placemarkFromCoordinates(
@@ -101,9 +122,9 @@ class _CheckOutVerificationScreenState
   }
 
   Future<void> _loadUid() async {
-    // API REMOVED: Using local state/defaults
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      uid = 4;
+      uid = prefs.getInt('uid') ?? 4;
     });
   }
 
@@ -233,21 +254,22 @@ class _CheckOutVerificationScreenState
     IconData? prefixIcon,
   }) {
     return SizedBox(
-      height: 44,
+      height: 48,
       child: TextField(
         controller: controller,
         readOnly: readOnly,
         onTap: onTap,
+        style: const TextStyle(fontSize: 14),
         decoration: InputDecoration(
           hintText: hint,
           prefixIcon: prefixIcon != null
-              ? Icon(prefixIcon, color: const Color(0xFF26A69A), size: 22)
+              ? Icon(prefixIcon, color: const Color(0xFF26A69A), size: 20)
               : null,
           filled: true,
           fillColor: Colors.white,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 12,
-            vertical: 10,
+            vertical: 0,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(6),
@@ -268,9 +290,12 @@ class _CheckOutVerificationScreenState
 
   Widget _dropdownField() {
     return SizedBox(
-      height: 44,
+      height: 48,
       child: DropdownButtonFormField<String>(
         value: selectedMode,
+        isExpanded: true,
+        icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF26A69A)),
+        style: const TextStyle(fontSize: 14, color: Colors.black),
         items: const [
           DropdownMenuItem(value: 'Mode of work', child: Text('Mode of work')),
           DropdownMenuItem(value: 'Office', child: Text('Office')),
@@ -289,14 +314,17 @@ class _CheckOutVerificationScreenState
           fillColor: const Color(0xFFD7FFFA),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 12,
-            vertical: 10,
+            vertical: 0,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(6),
-            borderSide: BorderSide.none,
+            borderSide: const BorderSide(color: Color(0xFF2AA89A)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: Color(0xFF2AA89A)),
           ),
         ),
-        icon: const Icon(Icons.keyboard_arrow_down),
       ),
     );
   }
@@ -389,9 +417,21 @@ class _CheckOutVerificationScreenState
     );
 
     if (photo != null) {
-      setState(() {
-        _image = File(photo.path);
-      });
+      final String extension = photo.path.split('.').last.toLowerCase();
+      if (extension == 'jpeg' || extension == 'jpg' || extension == 'png') {
+        setState(() {
+          _image = File(photo.path);
+        });
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Only JPEG and PNG images are allowed'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -407,34 +447,112 @@ class _CheckOutVerificationScreenState
   }
 
   void _submit() async {
-    if (outTimeController.text.isEmpty ||
-        locationController.text.isEmpty ||
-        selectedMode == 'Mode of work' ||
-        _image == null) {
+    String? errorMsg;
+    if (uid == null) {
+      errorMsg = 'User ID not found. Please log in again.';
+    } else if (outTimeController.text.isEmpty) {
+      errorMsg = 'Please select Out Time';
+    } else if (locationController.text.isEmpty ||
+        locationController.text == "Fetching location...") {
+      errorMsg = 'Please wait for location to be fetched';
+    } else if (selectedMode == 'Mode of work') {
+      errorMsg = 'Please select Work Mode';
+    } else if (_image == null) {
+      errorMsg = 'Please take a selfie for verification';
+    }
+
+    if (errorMsg != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all details and take a selfie'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
       );
       return;
     }
 
     setState(() => isLoading = true);
 
-    // API REMOVED: Simulation success
-    await Future.delayed(const Duration(milliseconds: 1000));
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse("https://erpsmart.in/total/api/m_api/"),
+      );
 
-    setState(() => isLoading = false);
+      request.fields.addAll({
+        "type": "2047", // Assuming 2047 for check-out
+        "cid": "21472147",
+        "uid": uid.toString(),
+        "out_time": outTimeController.text,
+        "loc": locationController.text,
+        "wrk_mde": selectedMode,
+        "device_id": deviceId ?? "unknown",
+        "ld": "34",
+        "lt": currentPosition?.latitude.toString() ?? "0.0",
+        "ln": currentPosition?.longitude.toString() ?? "0.0",
+      });
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Checked out successfully'),
-          backgroundColor: Color(0xFF2AA89A),
+      final String extension = _image!.path.split('.').last.toLowerCase();
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'selfie',
+          _image!.path,
+          contentType: MediaType(
+            'image',
+            extension == 'jpg' ? 'jpeg' : extension,
+          ),
         ),
       );
-      Navigator.pop(context, true);
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      final responseData = jsonDecode(response.body);
+
+      debugPrint("CHECK-OUT RESPONSE => ${response.body}");
+
+      final bool isSuccess =
+          responseData["error"] == false ||
+          responseData["error"] == "false" ||
+          responseData["message"].toString().toLowerCase().contains(
+            "success",
+          ) ||
+          responseData["message"].toString().toLowerCase().contains(
+            "successfully",
+          );
+
+      if (isSuccess) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                responseData["message"] ?? 'Checked out successfully',
+              ),
+              backgroundColor: const Color(0xFF2AA89A),
+            ),
+          );
+          Navigator.pop(context, true);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(responseData["message"] ?? 'Check-out failed'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint("CHECK-OUT ERROR => $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Server error occurred'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
 }

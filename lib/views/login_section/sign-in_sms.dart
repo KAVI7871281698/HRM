@@ -6,7 +6,7 @@ import 'package:hrm/views/login_section/sign-in_whatsapp.dart';
 import 'package:hrm/views/login_section/sign-up.dart';
 import 'otp_popup.dart';
 
-import '../../services/login_api.dart';
+import '../../models/login_api.dart';
 
 class SmsLogin extends StatefulWidget {
   const SmsLogin({super.key});
